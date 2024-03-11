@@ -1,38 +1,61 @@
-# This workflow will build and push a new container image to Amazon ECR,
-# and then will deploy a new task definition to Amazon ECS, when there is a push to the "main" branch.
+# # This workflow will build and push a new container image to Amazon ECR,
+# # and then will deploy a new task definition to Amazon ECS, when there is a push to the "main" branch.
 
-name: Deploy to Amazon ECS
+# name: Deploy to Amazon ECS
+
+# on:
+#   push:
+#     branches: [ "main" ]
+
+# # env:
+# #   AWS_REGION: MY_AWS_REGION                   # set this to your preferred AWS region, e.g. us-west-1
+
+# permissions:
+#   contents: read
+
+# jobs:
+#   deploy:
+#     name: Deploy
+#     runs-on: ubuntu-latest
+#     # environment: production
+
+#     steps:
+#     - name: Checkout
+#       uses: actions/checkout@v4.1.1
+#     # - name: Deploy to Server 1
+#     #   uses: easingthemes/ssh-deploy@main
+#       env:
+#         SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+        
+#         REMOTE_HOST: ${{ secrets.HOST_DNS }}
+#         REMOTE_USER: ${{ secrets.USERNAME }}
+#         # TARGET: ${{ secrets.TARGET_DIR }}
+        
+#     - name : wesy hi
+#       run: |
+#             echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
+#             ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} 'mkdir new_folder'
+
+name: Upload File to EC2
 
 on:
   push:
-    branches: [ "main" ]
-
-# env:
-#   AWS_REGION: MY_AWS_REGION                   # set this to your preferred AWS region, e.g. us-west-1
-
-permissions:
-  contents: read
+    branches:
+      - main  # Change this to your main branch
 
 jobs:
-  deploy:
-    name: Deploy
-    runs-on: ubuntu-latest
-    # environment: production
+  upload-file:
+    runs-on: ubuntu-latest  # You can change the operating system if needed
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4.1.1
-    # - name: Deploy to Server 1
-    #   uses: easingthemes/ssh-deploy@main
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-        
-        REMOTE_HOST: ${{ secrets.HOST_DNS }}
-        REMOTE_USER: ${{ secrets.USERNAME }}
-        # TARGET: ${{ secrets.TARGET_DIR }}
-        
-    - name : wesy hi
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Upload File to EC2
       run: |
-            echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
-            ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} 'mkdir new_folder'
+        scp -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SSH_KEY }} path/to/local/file.txt ${USER_NAME}@${HOST_DNS}:${TARGET_DIR}
+      env:
+        USER_NAME: ${{ secrets.USERNAME }}
+        HOSTNAME: ${{ secrets.HOST_DNS }}
+
 
