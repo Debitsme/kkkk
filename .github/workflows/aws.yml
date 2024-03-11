@@ -22,13 +22,17 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4.1.1
-
-    - name: Deploy to Server 1
-      uses: easingthemes/ssh-deploy@main
+    # - name: Deploy to Server 1
+    #   uses: easingthemes/ssh-deploy@main
       env:
         SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
         
         REMOTE_HOST: ${{ secrets.HOST_DNS }}
         REMOTE_USER: ${{ secrets.USERNAME }}
-        TARGET: ${{ secrets.TARGET_DIR }}
-    
+        # TARGET: ${{ secrets.TARGET_DIR }}
+        
+    - name : wesy hi
+      run: |
+            echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
+            ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} 'mkdir new_folder'
+
