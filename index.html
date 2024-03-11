@@ -1,111 +1,44 @@
-terraform {
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "3.83.0"
-    }
-  }
-}
+<!DOCTYPE html>
+<html lang="en">
 
-data "azurerm_resource_group" "existing_rg" {
-  name = "Personal_project"
-}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample HTML Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
 
-# resource "azurerm_virtual_network" "Vnet" {
-#   name                = "azure-viruta"
-#   resource_group_name = data.azurerm_resource_group.existing_rg.name
-#   location            = "Central US"
-#   address_space       = ["10.0.0.0/16"]
-# }
-# resource "azurerm_subnet" "azsubnet" {
-#   name                 = "azure-subnet"
-#   resource_group_name  = data.azurerm_resource_group.existing_rg.name
-#   virtual_network_name = azurerm_virtual_network.Vnet.name
-#   address_prefixes     = ["10.0.1.0/24"]
+        h1 {
+            color: #007BFF;
+        }
 
-# }
-resource "azurerm_storage_account" "storage-acccount" {
-  name                     = var.storage-name-account
-  resource_group_name      = data.azurerm_resource_group.existing_rg.name
-  location                 = var.location_azure
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-  account_kind             = "StorageV2" #must if we are using a static website
-  static_website {
-    index_document = "index.html"
-  }
-  tags = {
-    environment = "staging"
-  }
-}
-# why am i not using azurerm_storage_container is because the static website content is always displayed inside #web which is created on its own
+        p {
+            line-height: 1.6;
+        }
+    </style>
+</head>
 
-# resource "azurerm_storage_container" "storage-contianer" {
-#   name                  = "container1"
-#   storage_account_name  = azurerm_storage_account.storage-acccount.name
-#   container_access_type = "private"
-# 
-# data "azurerm_storage_container" "existing_rg" {
-#   name = "Personal_project"
-# }
+<body>
 
-resource "azurerm_storage_blob" "storage-blob" {
-  name                   = "index.html"
-  storage_account_name   = azurerm_storage_account.storage-acccount.name
-  storage_container_name = "$web"
-  type                   = "Block"
-  content_type = "text/html"  # without the content_type it will download the index.html file instead of showing it to us on https
-  source = "${path.root}/public/index.html"
-  #source                 = "public/index.html"
-  # source                 = file("${path.module}/index.html")
-}
+    <h1>Welcome to My Sample HTML Page</h1>
 
-#iteration in terraform
-resource "azurerm_storage_blob" "storage_blob_images" {
-  for_each = fileset("${path.root}/public/asset","*.{jpg,jpeg}") #provide a list of files matches a pattern(path,pattern) output is (["a","b"]) (its a set) (list function)
-  #2 categories of comples type (list map and set) structural (tuples and object)
-  #as the output is a set so we will only have a key its if a map then we will have a key and a value (questionable ?)
-  #each.key will be like (0,1) and each.value will be (name of the files)
-  type                   = "Block"
-  name                   = "asset/${each.value}"
-  storage_account_name   = azurerm_storage_account.storage-acccount.name
-  storage_container_name = "$web"  
-  #for_each provide the value in the form of each.key
-  source = "${path.root}/public/asset/${each.key}"
-}
+    <p>This is a simple HTML page to demonstrate the basic structure of an HTML document.</p>
 
+    <h2>Features:</h2>
+    <ul>
+        <li>HTML5 doctype declaration</li>
+        <li>Viewport meta tag for responsiveness</li>
+        <li>Page title</li>
+        <li>Basic styling with CSS</li>
+        <li>Headings and paragraphs</li>
+        <li>Unordered list</li>
+    </ul>
 
+    <p>Feel free to modify and enhance this page to suit your needs!</p>
 
+</body>
 
-
-
-resource "azurerm_cdn_profile" "cdwalin" {
-  name                = "example-cdn"
-  location            = var.location_azure
-  resource_group_name      = data.azurerm_resource_group.existing_rg.name
-  sku                 = "Standard_Verizon"
-}
-
-resource "azurerm_cdn_endpoint" "cdendpoin" {
-  name                = "example-cdendpoin"
-  profile_name        = azurerm_cdn_profile.cdwalin.name
-  location            = var.location_azure
-  resource_group_name      = data.azurerm_resource_group.existing_rg.name
-  is_http_allowed     = false
-  is_https_allowed    = true
-  #querystring_caching_behaviour = "IgnoreQueryString"   things that comes after ? in a url
-  origin {
-    name      = "alvadaci"
-    host_name = "${azurerm_storage_account.storage-acccount.name}.z19.web.core.windows.net"
-
-    #host_name ="https://${azurerm_storage_account.storage-acccount.name}.z19.web.core.windows.net"
-    #host_name = azurerm_storage_account.storage-acccount.primary_web_endpoint
-  }
-}
-output "public-endpoint" {
-  value = azurerm_storage_account.storage-acccount.primary_web_endpoint
-}
-output "cdn_endpoint_hostname" {
-  value = azurerm_cdn_endpoint.cdendpoin.fqdn
-
-}
+</html>
