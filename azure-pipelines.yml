@@ -7,8 +7,9 @@ trigger:
 - main
 
 pool:
-  #vmImage: ubuntu-latest
   image: alpha-bravo
+  #vmImage: ubuntu-latest
+
 
 steps:
 - script: echo Hello, world!
